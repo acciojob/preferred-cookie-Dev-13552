@@ -35,21 +35,25 @@ function applyPreferences() {
   }
 }
 
-// Save preferences to cookies on form submission
-document.getElementById("fontForm").addEventListener("submit", function (e) {
-  e.preventDefault();
+// ✅ Wait for DOM before accessing form
+window.addEventListener("DOMContentLoaded", () => {
+  applyPreferences();
 
-  const fontSize = document.getElementById("fontsize").value;
-  const fontColor = document.getElementById("fontcolor").value;
+  const form = document.getElementById("fontForm");
+  if (!form) return; // safety check
 
-  // Save cookies for 7 days
-  setCookie("fontsize", fontSize, 7);
-  setCookie("fontcolor", fontColor, 7);
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
 
-  // Apply immediately
-  document.documentElement.style.setProperty("--fontsize", fontSize + "px");
-  document.documentElement.style.setProperty("--fontcolor", fontColor);
+    const fontSize = document.getElementById("fontsize").value;
+    const fontColor = document.getElementById("fontcolor").value;
+
+    // Save cookies for 7 days
+    setCookie("fontsize", fontSize, 7);
+    setCookie("fontcolor", fontColor, 7);
+
+    // Apply immediately
+    document.documentElement.style.setProperty("--fontsize", fontSize + "px");
+    document.documentElement.style.setProperty("--fontcolor", fontColor);
+  });
 });
-
-// Apply preferences when page loads
-window.addEventListener("DOMContentLoaded", applyPreferences);
