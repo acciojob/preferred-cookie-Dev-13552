@@ -1,11 +1,12 @@
-// Helper: Set cookie with name, value, and expiration days
+// ✅ Set cookie with proper attributes (Cypress-compatible)
 function setCookie(name, value, days) {
   const date = new Date();
   date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-  document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
+  // "SameSite=None; Secure" ensures visibility under Cypress localhost
+  document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/; SameSite=None; Secure`;
 }
 
-// Helper: Get cookie by name
+// ✅ Get cookie value by name
 function getCookie(name) {
   const cookieArr = document.cookie.split("; ");
   for (let c of cookieArr) {
@@ -15,7 +16,7 @@ function getCookie(name) {
   return null;
 }
 
-// Apply font preferences from cookies
+// ✅ Apply preferences from cookies (if exist)
 function applyPreferences() {
   const savedFontSize = getCookie("fontsize");
   const savedFontColor = getCookie("fontcolor");
@@ -35,12 +36,12 @@ function applyPreferences() {
   }
 }
 
-// ✅ Wait for DOM before accessing form
+// ✅ Wait for DOM before using form
 window.addEventListener("DOMContentLoaded", () => {
   applyPreferences();
 
   const form = document.getElementById("fontForm");
-  if (!form) return; // safety check
+  if (!form) return; // Safety guard for Cypress timing
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
@@ -48,11 +49,11 @@ window.addEventListener("DOMContentLoaded", () => {
     const fontSize = document.getElementById("fontsize").value;
     const fontColor = document.getElementById("fontcolor").value;
 
-    // Save cookies for 7 days
+    // ✅ Save cookies for 7 days
     setCookie("fontsize", fontSize, 7);
     setCookie("fontcolor", fontColor, 7);
 
-    // Apply immediately
+    // ✅ Apply immediately
     document.documentElement.style.setProperty("--fontsize", fontSize + "px");
     document.documentElement.style.setProperty("--fontcolor", fontColor);
   });
