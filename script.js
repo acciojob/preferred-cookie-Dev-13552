@@ -1,59 +1,54 @@
-// ✅ Set cookie with proper attributes (Cypress-compatible)
+// --- Helper functions ---
 function setCookie(name, value, days) {
-  const date = new Date();
-  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-  // "SameSite=None; Secure" ensures visibility under Cypress localhost
-  document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/; SameSite=None; Secure`;
+  const d = new Date();
+  d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+  // Cypress-friendly cookie (no Secure flag)
+  document.cookie = `${name}=${value}; expires=${d.toUTCString()}; path=/`;
 }
 
-// ✅ Get cookie value by name
 function getCookie(name) {
-  const cookieArr = document.cookie.split("; ");
-  for (let c of cookieArr) {
-    const [key, value] = c.split("=");
-    if (key === name) return value;
+  const cookies = document.cookie.split("; ");
+  for (let cookie of cookies) {
+    const [key, val] = cookie.split("=");
+    if (key === name) return val;
   }
   return null;
 }
 
-// ✅ Apply preferences from cookies (if exist)
+// --- Apply preferences from cookies ---
 function applyPreferences() {
-  const savedFontSize = getCookie("fontsize");
-  const savedFontColor = getCookie("fontcolor");
-
+  const fontSize = getCookie("fontsize");
+  const fontColor = getCookie("fontcolor");
   const root = document.documentElement;
-  const fontSizeInput = document.getElementById("fontsize");
-  const fontColorInput = document.getElementById("fontcolor");
 
-  if (savedFontSize) {
-    root.style.setProperty("--fontsize", savedFontSize + "px");
-    fontSizeInput.value = savedFontSize;
+  if (fontSize) {
+    root.style.setProperty("--fontsize", fontSize + "px");
+    document.getElementById("fontsize").value = fontSize;
   }
-
-  if (savedFontColor) {
-    root.style.setProperty("--fontcolor", savedFontColor);
-    fontColorInput.value = savedFontColor;
+  if (fontColor) {
+    root.style.setProperty("--fontcolor", fontColor);
+    document.getElementById("fontcolor").value = fontColor;
   }
 }
 
-// ✅ Wait for DOM before using form
+// --- Wait until DOM ready ---
 window.addEventListener("DOMContentLoaded", () => {
   applyPreferences();
 
   const form = document.getElementById("fontForm");
-  if (!form) return; // Safety guard for Cypress timing
+  if (!form) return;
 
-  form.addEventListener("submit", function (e) {
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const fontSize = document.getElementById("fontsize").value;
     const fontColor = document.getElementById("fontcolor").value;
 
-    // ✅ Save cookies for 7 days
+    // ✅ Set cookies visible to Cypress
     setCookie("fontsize", fontSize, 7);
     setCookie("fontcolor", fontColor, 7);
 
-    // ✅ Apply immediately
+    // ✅ Apply styles immediately
     document.documentElement.style.setProperty("--fontsize", fontSize + "px");
     document.documentElement.style.setProperty("--fontcolor", fontColor);
   });
